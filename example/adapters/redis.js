@@ -1,8 +1,30 @@
 // npm i ioredis@^4.0.0
 import Redis from 'ioredis'; // eslint-disable-line import/no-unresolved
+import dotenv from 'dotenv';
 import isEmpty from 'lodash/isEmpty.js';
+dotenv.config();
 
-const client = new Redis(process.env.REDIS_URL, { keyPrefix: 'oidc:' });
+const client = new Redis(
+  process.env.REDIS_HOST,
+  process.env.REDIS_PORT,
+  {
+      password: process.env.REDIS_PASSWORD,
+      keyPrefix: 'oidc:'
+  })
+  .on('connect', function () {
+      console.log('Redis connected ' + process.env.REDIS_HOST + ":" + process.env.REDIS_PORT);
+  })
+  .on('error', (err) => {
+      if (err.code == 'ECONNREFUSED') {
+          console.log("ERROR Redis: Express cannot create a Redis connection, ECONNREFUSED")
+          client.disconnect()
+          return;
+      } else {
+          console.log("ERROR Redis: Express unable to connect to Redis");
+          console.log(err)
+      }
+  })
+
 
 const grantable = new Set([
   'AccessToken',

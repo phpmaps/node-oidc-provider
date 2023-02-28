@@ -51,6 +51,7 @@
   ],
   "scripts": {
     "ci": "node ./test/ci",
+    "start": "node ./example/express.js",
     "format": "eslint lib example certification test docs --fix",
     "heroku-postbuild": "npm install mongodb@^4.3.0 openid-client@^5.0.0",
     "test": "node ./test/run"
@@ -59,8 +60,10 @@
     "@koa/cors": "^4.0.0",
     "@koa/router": "^12.0.0",
     "debug": "^4.3.4",
+    "dotenv": "^16.0.3",
     "ejs": "^3.1.8",
     "got": "^12.5.3",
+    "ioredis": "^4.28.5",
     "jose": "^4.11.4",
     "jsesc": "^3.0.2",
     "koa": "^2.14.1",

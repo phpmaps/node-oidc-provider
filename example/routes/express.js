@@ -2,6 +2,7 @@
 import { strict as assert } from 'node:assert';
 import * as querystring from 'node:querystring';
 import { inspect } from 'node:util';
+import { SessionNotFound } from '../../lib/helpers/errors.js';
 
 import isEmpty from 'lodash/isEmpty.js';
 import { urlencoded } from 'express'; // eslint-disable-line import/no-unresolved
@@ -21,7 +22,6 @@ const debug = (obj) => querystring.stringify(Object.entries(obj).reduce((acc, [k
 });
 
 export default (app, provider) => {
-  const { constructor: { errors: { SessionNotFound } } } = provider;
 
   app.use((req, res, next) => {
     const orig = res.render;
@@ -90,11 +90,24 @@ export default (app, provider) => {
 
   app.post('/interaction/:uid/login', setNoCache, body, async (req, res, next) => {
     try {
-      const { prompt: { name } } = await provider.interactionDetails(req, res);
+      const { grantId, params, prompt: { name } } = await provider.interactionDetails(req, res);
       assert.equal(name, 'login');
       const account = await Account.findByLogin(req.body.login);
 
+      let grant;
+      if (grantId) {
+        grant = await provider.Grant.find(grantId);
+      } else {
+        grant = new provider.Grant({ accountId: account.accountId, clientId: params.client_id });
+        if (params?.scope) {
+          grant.addOIDCScope(params?.scope);
+        }
+      }
+
       const result = {
+        consent: {
+          grantId: await grant.save()
+        },
         login: {
           accountId: account.accountId,
         },

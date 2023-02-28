@@ -1,16 +1,30 @@
 export default {
   clients: [
-    // {
-    //   client_id: 'oidcCLIENT',
-    //   client_secret: '...',
-    //   grant_types: ['refresh_token', 'authorization_code'],
-    //   redirect_uris: ['http://sso-client.dev/providers/7/open_id', 'http://sso-client.dev/providers/8/open_id'],
-    // }
+    {
+      client_id: 'ping',
+      client_secret: 'abc',
+      grant_types: ['refresh_token', 'authorization_code'],
+      redirect_uris: ['https://oidcdebugger.com/debug'],
+    }
   ],
   interactions: {
     url(ctx, interaction) { // eslint-disable-line no-unused-vars
       return `/interaction/${interaction.uid}`;
     },
+  },
+  ttl: {
+    Session: 24 * 60 * 60,
+    Interaction: 24 * 60 * 60,
+    AccessToken: 24 * 60 * 60,
+    AuthorizationCode: 24 * 60 * 60,
+    ClientCredentials: 24 * 60 * 60,
+    DeviceCode: 24 * 60 * 60,
+    IdToken: 24 * 60 * 60,
+    RefreshToken: 24 * 60 * 60,
+    Grant: 24 * 60 * 60,
+  },
+  pkce: {
+    required: () => false,
   },
   cookies: {
     keys: ['some secret key', 'and also the old rotated away some time ago', 'and one more'],
