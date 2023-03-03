@@ -71,9 +71,9 @@ class Account {
     return logins.get(id);
   }
 
-  static async findByLogin(login) {
+  static async findByLogin(login, profile) {
     if (!logins.get(login)) {
-      logins.set(login, new Account(login));
+      logins.set(login, new Account(login, profile));
     }
 
     return logins.get(login);

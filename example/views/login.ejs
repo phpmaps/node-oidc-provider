@@ -16,5 +16,10 @@
   <input required type="text" name="login" placeholder="Enter any login" <% if (!params.login_hint) { %>autofocus="on"<% } else { %> value="<%= params.login_hint %>" <% } %>>
   <input required type="password" name="password" placeholder="and password" <% if (params.login_hint) { %>autofocus="on"<% } %>>
 
+  <input type="hidden" name="interviewId" value="<%= interviewId %>"/>
+  <input type="hidden" name="apiUrl" id="apiUrl" value="<%= apiUrl %>"" />
+  <input type="hidden" name="interview" id="interview" value="<%= interview %>"" />
+  
+
   <button type="submit" class="login login-submit">Sign-in</button>
 </form>

@@ -66,6 +66,14 @@ class RedisAdapter {
     const multi = client.multi();
     multi[consumable.has(this.name) ? 'hmset' : 'set'](key, store);
 
+    //TODO Doogs Remove this Redis Stuff
+    console.log(`Initial has ${this.name}`)
+        console.log({
+          id: id,
+          key: key,
+          expiresIn: expiresIn
+        })
+
     if (expiresIn) {
       multi.expire(key, expiresIn);
     }
@@ -76,7 +84,16 @@ class RedisAdapter {
       // if you're seeing grant key lists growing out of acceptable proportions consider using LTRIM
       // here to trim the list to an appropriate length
       const ttl = await client.ttl(grantKey);
+      //TODO Doogs Remove this Redis Stuff
       if (expiresIn > ttl) {
+        console.log(`Grantable has ${this.name}`)
+        console.log({
+          id: id,
+          key: key,
+          grantKey: grantKey,
+          expiresIn: expiresIn,
+          ttl: ttl
+        })
         multi.expire(grantKey, expiresIn);
       }
     }

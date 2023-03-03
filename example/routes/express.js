@@ -8,6 +8,11 @@ import isEmpty from 'lodash/isEmpty.js';
 import { urlencoded } from 'express'; // eslint-disable-line import/no-unresolved
 
 import Account from '../support/account.js';
+import { initSession } from '../incode/init.js';
+import { clientTenant } from '../incode/client.js';
+import { getScores } from '../incode/api/get-scores.js';
+import { getOcr } from '../incode/api/get-ocr.js';
+import { flatten } from '../incode/helpers/flatten.js';
 
 const body = urlencoded({ extended: false });
 
@@ -51,11 +56,25 @@ export default (app, provider) => {
 
       const client = await provider.Client.find(params.client_id);
 
+      const incode = await initSession(clientTenant, 'init', uid);
+      const interviewId = incode.auth.interviewId;
+      const apiUrl = clientTenant.API_URL;
+      incode.auth.uid = uid;
+
+      delete incode.client;
+      delete incode.header;
+
+      const interview = JSON.stringify(incode);
+
+
       switch (prompt.name) {
         case 'login': {
           return res.render('login', {
             client,
             uid,
+            interview,
+            interviewId,
+            apiUrl,
             details: prompt.details,
             params,
             title: 'Sign-in',
@@ -90,9 +109,34 @@ export default (app, provider) => {
 
   app.post('/interaction/:uid/login', setNoCache, body, async (req, res, next) => {
     try {
+      // console.log(":::BODY");
+      // console.log({
+      //   interviewId: req.body.interviewId,
+      //   apiUrl: req.body.apiUrl,
+      //   interview: req.body.interview
+      // })
+      // console.log(req.body.interview);
+
+      const interview = JSON.parse(req.body.interview);
+      let data;
+      let incode;
+
+      if (req.body.interviewId) {
+        incode = await initSession(clientTenant, 'login', interview.auth.uid, req.body.interviewId);
+        // const scores = await getScores(clientTenant, incode.auth.interviewId, incode.header);
+        // const ocr = await getOcr(clientTenant, incode.auth.interviewId, incode.header)
+        // data = {
+        //   success: scores && ocr ? true : false,
+        //   scores: scores,
+        //   ocr: ocr
+        // }
+      }
+
       const { grantId, params, prompt: { name } } = await provider.interactionDetails(req, res);
       assert.equal(name, 'login');
-      const account = await Account.findByLogin(req.body.login);
+      const account = await Account.findByLogin(req.body.interviewId, incode);
+
+      console.log(account);
 
       let grant;
       if (grantId) {

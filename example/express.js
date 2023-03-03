@@ -3,31 +3,24 @@
 import * as path from 'node:path';
 import * as url from 'node:url';
 
-import { dirname } from 'desm';
 import express from 'express'; // eslint-disable-line import/no-unresolved
-import helmet from 'helmet';
-
+import dotenv from 'dotenv';
+import { dirname } from 'desm';
 import Provider from '../lib/index.js'; // from 'oidc-provider';
 
 import Account from './support/account.js';
 import configuration from './support/configuration.js';
 import routes from './routes/express.js';
+dotenv.config();
 
 const __dirname = dirname(import.meta.url);
 
-const { PORT = 3000, ISSUER = `http://localhost:${PORT}` } = process.env;
+const { PORT = 3000, ISSUER = process.env.OIDC_ISSUER } = process.env;
 configuration.findAccount = Account.findAccount;
 
 const app = express();
 
-const directives = helmet.contentSecurityPolicy.getDefaultDirectives();
-delete directives['form-action'];
-app.use(helmet({
-  contentSecurityPolicy: {
-    useDefaults: false,
-    directives,
-  },
-}));
+app.use(express.static(path.join(__dirname, 'public')))
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
